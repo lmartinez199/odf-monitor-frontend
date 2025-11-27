@@ -58,11 +58,6 @@ export default function DocumentDetail() {
       </div>
 
       <div className="document-content">
-        <h3>Contenido {isXml ? "XML" : "JSON"}</h3>
-        <div className="content-tabs">
-          <div className="tab active">Raw</div>
-          <div className="tab">Parsed</div>
-        </div>
         <ContentViewer
           content={document.content}
           parsedContent={parsedContent}

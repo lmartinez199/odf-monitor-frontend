@@ -48,6 +48,10 @@ apiClient.interceptors.response.use(
     if (error.response) {
       // El servidor respondió con un código de error
       switch (error.response.status) {
+        case 400:
+          // Error de validación - el mensaje del servidor es útil
+          console.error("Error de validación:", error.response.data);
+          break;
         case 401:
           console.error("No autorizado - Verifica tus credenciales");
           // Aquí puedes redirigir al login si es necesario

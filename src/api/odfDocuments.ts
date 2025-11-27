@@ -41,6 +41,11 @@ export interface DocumentListParams {
   documentCode?: string;
   documentType?: string;
   documentSubtype?: string;
+  discipline?: string;
+}
+
+export interface DisciplineListResponse {
+  disciplines: string[];
 }
 
 /**
@@ -93,6 +98,16 @@ export const odfDocumentsApi = {
   async compare(id1: string, id2: string): Promise<DocumentComparison> {
     const response = await apiClient.get<DocumentComparison>(
       `/odf-documents/compare/${id1}/${id2}`
+    );
+    return response.data;
+  },
+
+  /**
+   * Obtiene la lista de disciplinas disponibles
+   */
+  async getDisciplines(): Promise<DisciplineListResponse> {
+    const response = await apiClient.get<DisciplineListResponse>(
+      "/odf-documents/disciplines/list"
     );
     return response.data;
   },

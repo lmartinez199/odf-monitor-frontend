@@ -6,6 +6,7 @@ import {
   DocumentListResponse,
   DocumentListParams,
   DocumentComparison,
+  DisciplineListResponse,
 } from "../api/odfDocuments";
 
 /**
@@ -102,6 +103,23 @@ export function useOdfDocumentComparison(
     queryKey: odfDocumentsKeys.comparison(id1, id2),
     queryFn: () => odfDocumentsApi.compare(id1, id2),
     enabled: !!id1 && !!id2, // Solo ejecuta si ambos IDs están presentes
+    ...options,
+  });
+}
+
+/**
+ * Hook para obtener la lista de disciplinas disponibles
+ */
+export function useDisciplines(
+  options?: Omit<
+    UseQueryOptions<DisciplineListResponse, Error>,
+    "queryKey" | "queryFn"
+  >
+) {
+  return useQuery({
+    queryKey: [...odfDocumentsKeys.all, "disciplines"] as const,
+    queryFn: () => odfDocumentsApi.getDisciplines(),
+    staleTime: 5 * 60 * 1000, // Cache por 5 minutos (las disciplinas no cambian frecuentemente)
     ...options,
   });
 }
