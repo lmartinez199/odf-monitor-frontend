@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
+import { AlertTriangle, Search, Inbox, BarChart3, FileText, Zap } from "lucide-react";
 import { odfDocumentsApi } from "../api/odfDocuments";
 import { useDisciplines } from "../hooks/useOdfDocuments";
+import { useDebounce } from "../hooks/useDebounce";
 import "./DocumentList.css";
 
 export default function DocumentList() {
@@ -19,16 +21,50 @@ export default function DocumentList() {
 
   const { data: disciplinesData } = useDisciplines();
 
+  // Debounce de filtros de texto (500ms) para evitar múltiples consultas mientras el usuario escribe
+  // No aplicar debounce a discipline (select) ni a page/pageSize
+  const debouncedFilters = {
+    ...filters,
+    competitionCode: useDebounce(filters.competitionCode, 500),
+    documentCode: useDebounce(filters.documentCode, 500),
+    documentType: useDebounce(filters.documentType, 500),
+    documentSubtype: useDebounce(filters.documentSubtype, 500),
+    // discipline no necesita debounce porque es un select
+  };
+
+  // Validación de inputs
+  const isValidDiscipline = (code: string): boolean => {
+    if (code === "") return true; // Vacío es válido (sin filtro)
+    return /^[A-Z]{3}$/.test(code);
+  };
+
+  const isValidInput = (key: string, value: string): boolean => {
+    if (key === "discipline") {
+      return isValidDiscipline(value);
+    }
+    // Para otros campos, validar que no sean solo espacios
+    return value.trim() === value || value === "";
+  };
+
+  // Filtrar solo valores válidos antes de enviar
+  const getValidFilters = () => {
+    return Object.fromEntries(
+      Object.entries(debouncedFilters).filter(([key, value]) => {
+        if (value === "") return false;
+        return isValidInput(key, value);
+      }),
+    );
+  };
+
   const { data, isLoading, error } = useQuery({
-    queryKey: ["documents", page, pageSize, filters],
+    queryKey: ["documents", page, pageSize, debouncedFilters],
     queryFn: () =>
       odfDocumentsApi.getAll({
         page,
         pageSize,
-        ...Object.fromEntries(
-          Object.entries(filters).filter(([_, v]) => v !== ""),
-        ),
+        ...getValidFilters(),
       }),
+    enabled: isValidDiscipline(debouncedFilters.discipline), // Solo ejecutar si la disciplina es válida
   });
 
   const handleFilterChange = (key: string, value: string) => {
@@ -58,7 +94,7 @@ export default function DocumentList() {
   if (error)
     return (
       <div className="error">
-        <div className="error-icon">⚠️</div>
+        <AlertTriangle className="error-icon" size={48} />
         <h3>Error al cargar documentos</h3>
         <p>{getErrorMessage()}</p>
       </div>
@@ -67,26 +103,50 @@ export default function DocumentList() {
   return (
     <div className="document-list">
       <div className="document-list-header">
-        <h2>Documentos ODF</h2>
-        {data && (
-          <div className="document-stats">
-            <div className="stat-card">
-              <div className="stat-label">Total</div>
-              <div className="stat-value">{data.total.toLocaleString()}</div>
-            </div>
-            <div className="stat-card">
-              <div className="stat-label">Página</div>
-              <div className="stat-value">
-                {page} / {Math.ceil(data.total / pageSize)}
+        <div className="header-content">
+          <div className="header-title-section">
+            <h2>Documentos ODF</h2>
+          </div>
+          {data && (
+            <div className="document-stats">
+              <div className="stat-card">
+                <div className="stat-icon">
+                  <BarChart3 size={24} />
+                </div>
+                <div className="stat-content">
+                  <div className="stat-label">Total Documentos</div>
+                  <div className="stat-value">{data.total.toLocaleString()}</div>
+                </div>
+              </div>
+              <div className="stat-card">
+                <div className="stat-icon">
+                  <FileText size={24} />
+                </div>
+                <div className="stat-content">
+                  <div className="stat-label">Página Actual</div>
+                  <div className="stat-value">
+                    {page} / {Math.ceil(data.total / pageSize)}
+                  </div>
+                </div>
+              </div>
+              <div className="stat-card">
+                <div className="stat-icon">
+                  <Zap size={24} />
+                </div>
+                <div className="stat-content">
+                  <div className="stat-label">Por Página</div>
+                  <div className="stat-value">{pageSize}</div>
+                </div>
               </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
 
       <div className="filters">
         <div className="filters-title">
-          🔍 Filtros de búsqueda
+          <Search size={18} />
+          <span>Filtros de búsqueda</span>
         </div>
         <div className="filters-grid">
           <div className="filter-group">
@@ -143,6 +203,11 @@ export default function DocumentList() {
                 </option>
               ))}
             </select>
+            {filters.discipline && !isValidDiscipline(filters.discipline) && (
+              <span className="filter-error-message">
+                La disciplina debe tener exactamente 3 letras mayúsculas
+              </span>
+            )}
           </div>
         </div>
       </div>
@@ -172,7 +237,7 @@ export default function DocumentList() {
               {data?.documents.length === 0 ? (
                 <tr>
                   <td colSpan={5} style={{ textAlign: "center", padding: "3rem" }}>
-                    <div style={{ fontSize: "3rem", marginBottom: "1rem" }}>📭</div>
+                    <Inbox size={48} style={{ marginBottom: "1rem", opacity: 0.5, color: "var(--text-tertiary)" }} />
                     <div style={{ color: "var(--text-tertiary)" }}>No se encontraron documentos</div>
                   </td>
                 </tr>

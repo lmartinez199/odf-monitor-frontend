@@ -14,69 +14,92 @@
 }
 
 .document-list-header {
+  margin-bottom: 1.5rem;
+}
+
+.header-content {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 2rem;
-  flex-wrap: wrap;
-  gap: 1rem;
+  gap: 2rem;
+}
+
+@media (max-width: 1200px) {
+  .header-content {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+  
+  .document-stats {
+    width: 100%;
+  }
+}
+
+.header-title-section {
+  flex: 1;
+  min-width: 250px;
 }
 
 .document-list-header h2 {
   margin: 0;
-  font-size: 2rem;
-  font-weight: 700;
+  font-size: 1.5rem;
+  font-weight: 600;
   color: var(--text-primary);
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
 }
 
-.document-list-header h2::before {
-  content: "📄";
-  font-size: 2rem;
+.header-subtitle {
+  display: none;
 }
 
 .document-stats {
   display: flex;
   gap: 1rem;
-  align-items: center;
+  flex-wrap: wrap;
+  min-width: fit-content;
 }
 
 .stat-card {
-  background: linear-gradient(135deg, var(--bg-card), var(--bg-tertiary));
-  padding: 1rem 1.5rem;
-  border-radius: 12px;
+  background: var(--bg-card);
+  padding: 1rem 1.25rem;
+  border-radius: 8px;
   border: 1px solid var(--border-color);
-  box-shadow: var(--shadow-sm);
-  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
 }
 
-.stat-card:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
-  border-color: var(--accent-primary);
+.stat-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent-primary);
+  flex-shrink: 0;
+}
+
+.stat-content {
+  flex: 1;
 }
 
 .stat-label {
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   color: var(--text-tertiary);
   margin-bottom: 0.25rem;
+  font-weight: 400;
 }
 
 .stat-value {
   font-size: 1.5rem;
-  font-weight: 700;
-  color: var(--accent-primary);
+  font-weight: 600;
+  color: var(--text-primary);
+  line-height: 1.2;
 }
 
 .filters {
   background: var(--bg-card);
   padding: 1.5rem;
-  border-radius: 12px;
+  border-radius: 8px;
   border: 1px solid var(--border-color);
   margin-bottom: 2rem;
-  box-shadow: var(--shadow-sm);
 }
 
 .filters-title {
@@ -87,6 +110,10 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
+}
+
+.filters-title svg {
+  color: var(--text-tertiary);
 }
 
 .filters-grid {
@@ -129,6 +156,18 @@
   color: var(--text-tertiary);
 }
 
+.filter-input-error {
+  border-color: #ef4444 !important;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1) !important;
+}
+
+.filter-error-message {
+  font-size: 0.75rem;
+  color: #ef4444;
+  margin-top: 0.25rem;
+  display: block;
+}
+
 .filter-input select,
 .filter-input[type="select"] {
   cursor: pointer;
@@ -154,10 +193,9 @@ select.filter-input {
 
 .table-container {
   background: var(--bg-card);
-  border-radius: 12px;
+  border-radius: 8px;
   border: 1px solid var(--border-color);
   overflow: hidden;
-  box-shadow: var(--shadow-md);
   margin-bottom: 2rem;
 }
 
@@ -167,7 +205,7 @@ select.filter-input {
 }
 
 .documents-table thead {
-  background: linear-gradient(135deg, var(--bg-tertiary), var(--bg-secondary));
+  background: var(--bg-tertiary);
 }
 
 .documents-table th {
@@ -196,7 +234,6 @@ select.filter-input {
 
 .documents-table tbody tr:hover {
   background: var(--bg-tertiary);
-  transform: scale(1.01);
 }
 
 .documents-table tbody tr:last-child {
@@ -228,45 +265,19 @@ select.filter-input {
 }
 
 .btn-view {
-  background: linear-gradient(135deg, var(--accent-primary), var(--accent-hover));
+  background: var(--accent-primary);
   color: white;
   border: none;
-  padding: 0.625rem 1.25rem;
-  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
   cursor: pointer;
   font-size: 0.875rem;
-  font-weight: 600;
-  transition: all 0.2s ease;
-  box-shadow: var(--shadow-sm);
-  position: relative;
-  overflow: hidden;
-}
-
-.btn-view::before {
-  content: "";
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 0;
-  height: 0;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.2);
-  transform: translate(-50%, -50%);
-  transition: width 0.6s, height 0.6s;
-}
-
-.btn-view:hover::before {
-  width: 300px;
-  height: 300px;
+  font-weight: 500;
+  transition: background 0.2s ease;
 }
 
 .btn-view:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
-}
-
-.btn-view:active {
-  transform: translateY(0);
+  background: var(--accent-hover);
 }
 
 .pagination {
@@ -351,8 +362,9 @@ select.filter-input {
 }
 
 .error-icon {
-  font-size: 3rem;
   margin-bottom: 1rem;
+  color: var(--error);
+  opacity: 0.8;
 }
 
 /* Skeleton loader */

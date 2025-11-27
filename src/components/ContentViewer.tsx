@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
+import { FileCode, Loader2, Copy, Check, Inbox } from "lucide-react";
 import "./ContentViewer.css";
 
 interface ContentViewerProps {
@@ -83,6 +84,7 @@ export default function ContentViewer({
   isXml,
 }: ContentViewerProps) {
   const [viewMode, setViewMode] = useState<"raw" | "parsed">("raw");
+  const [copied, setCopied] = useState(false);
 
   const getFormattedContent = () => {
     if (viewMode === "raw") {
@@ -103,22 +105,39 @@ export default function ContentViewer({
     }
   };
 
+  const handleCopy = async () => {
+    const textToCopy = getFormattedContent();
+    try {
+      await navigator.clipboard.writeText(textToCopy);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error("Failed to copy:", err);
+      // Fallback para navegadores que no soportan clipboard API
+      const textArea = document.createElement("textarea");
+      textArea.value = textToCopy;
+      textArea.style.position = "fixed";
+      textArea.style.opacity = "0";
+      document.body.appendChild(textArea);
+      textArea.select();
+      try {
+        document.execCommand("copy");
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      } catch (fallbackErr) {
+        console.error("Fallback copy failed:", fallbackErr);
+      }
+      document.body.removeChild(textArea);
+    }
+  };
+
   return (
     <div className="content-viewer">
       <div className="viewer-header">
         <div className="viewer-title-section">
           <h3 className="viewer-title">
-            {isXml ? (
-              <>
-                <span className="icon">📄</span>
-                <span>Contenido XML</span>
-              </>
-            ) : (
-              <>
-                <span className="icon">📄</span>
-                <span>Contenido JSON</span>
-              </>
-            )}
+            <FileCode className="icon" size={20} />
+            <span>{isXml ? "Contenido XML" : "Contenido JSON"}</span>
           </h3>
           <div className="viewer-meta">
             {viewMode === "raw" && isXml && (
@@ -129,19 +148,39 @@ export default function ContentViewer({
             )}
           </div>
         </div>
-        <div className="viewer-tabs">
+        <div className="viewer-actions">
+          <div className="viewer-tabs">
+            <button
+              className={`tab-button ${viewMode === "raw" ? "active" : ""}`}
+              onClick={() => setViewMode("raw")}
+            >
+              Raw
+            </button>
+            <button
+              className={`tab-button ${viewMode === "parsed" ? "active" : ""}`}
+              onClick={() => setViewMode("parsed")}
+              disabled={!parsedContent && !isLoading}
+            >
+              Parsed {isLoading && <Loader2 className="loading-icon" size={14} />}
+            </button>
+          </div>
           <button
-            className={`tab-button ${viewMode === "raw" ? "active" : ""}`}
-            onClick={() => setViewMode("raw")}
+            className="copy-button"
+            onClick={handleCopy}
+            title="Copiar al portapapeles"
+            disabled={viewMode === "parsed" && !parsedContent}
           >
-            Raw
-          </button>
-          <button
-            className={`tab-button ${viewMode === "parsed" ? "active" : ""}`}
-            onClick={() => setViewMode("parsed")}
-            disabled={!parsedContent && !isLoading}
-          >
-            Parsed {isLoading && <span className="loading-dot">⏳</span>}
+            {copied ? (
+              <>
+                <Check className="copy-icon" size={16} />
+                <span>Copiado</span>
+              </>
+            ) : (
+              <>
+                <Copy className="copy-icon" size={16} />
+                <span>Copiar</span>
+              </>
+            )}
           </button>
         </div>
       </div>
@@ -154,13 +193,13 @@ export default function ContentViewer({
           </div>
         ) : viewMode === "parsed" && !parsedContent ? (
           <div className="empty-state">
-            <span className="empty-icon">📭</span>
+            <Inbox className="empty-icon" size={48} />
             <span>No hay contenido parseado disponible</span>
           </div>
         ) : (
           <div className="code-container">
             <SyntaxHighlighter
-              language={isXml ? "xml" : "json"}
+              language={viewMode === "parsed" ? "json" : isXml ? "xml" : "json"}
               style={vscDarkPlus}
               customStyle={{
                 margin: 0,

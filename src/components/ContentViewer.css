@@ -50,7 +50,8 @@
 }
 
 .viewer-title .icon {
-  font-size: 1.25rem;
+  flex-shrink: 0;
+  color: #cccccc;
 }
 
 .viewer-meta {
@@ -68,6 +69,12 @@
   font-weight: 500;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+}
+
+.viewer-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
 }
 
 .viewer-tabs {
@@ -111,8 +118,53 @@
   cursor: not-allowed;
 }
 
+.loading-icon {
+  animation: spin 1s linear infinite;
+  color: #cccccc;
+}
+
 .loading-dot {
   animation: pulse 1.5s ease-in-out infinite;
+}
+
+.copy-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: #252526;
+  border: 1px solid #3e3e3e;
+  border-radius: 6px;
+  color: #cccccc;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+
+.copy-button:hover:not(:disabled) {
+  background: #2a2d2e;
+  border-color: #0e639c;
+  color: #ffffff;
+}
+
+.copy-button:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.copy-button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.copy-button .copy-icon {
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+}
+
+.copy-button:not(:disabled):hover .copy-icon {
+  transform: scale(1.1);
 }
 
 @keyframes pulse {
@@ -188,8 +240,8 @@
 }
 
 .empty-icon {
-  font-size: 3rem;
   opacity: 0.5;
+  color: #858585;
 }
 
 .spinner {
